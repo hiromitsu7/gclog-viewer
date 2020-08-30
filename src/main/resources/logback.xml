@@ -1,0 +1,25 @@
+<configuration>
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{30} %method -
+				%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT_MSG_ONLY"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="hiromitsu.gclogviewer.GCLogHandler" level="DEBUG"
+		additivity="false">
+		<appender-ref ref="STDOUT_MSG_ONLY" />
+	</logger>
+
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
