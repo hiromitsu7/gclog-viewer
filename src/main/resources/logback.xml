@@ -14,12 +14,22 @@
 		</encoder>
 	</appender>
 
+
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>output_all.csv</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
+
 	<logger name="hiromitsu.gclogviewer.GCLogHandler" level="DEBUG"
 		additivity="false">
-		<appender-ref ref="STDOUT_MSG_ONLY" />
+		<appender-ref ref="FILE" />
 	</logger>
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

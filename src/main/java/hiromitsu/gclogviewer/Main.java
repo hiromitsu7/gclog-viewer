@@ -26,8 +26,6 @@ public class Main {
   private static Logger logger = LoggerFactory.getLogger(Main.class);
 
   public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-    System.out.println("hello");
-
     File f = new File("verbosegc.001.log");
 
     SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -42,11 +40,15 @@ public class Main {
       String line = null;
       while ((line = br.readLine()) != null) {
         if (line.isEmpty()) {
+          if (sb.toString().contains("<?xml") || sb.toString().contains("<verbosegc")) {
+            sb = new StringBuilder();
+            continue;
+          }
           String part = wrapByRoot(sb);
           ByteArrayInputStream bis = new ByteArrayInputStream(part.getBytes(StandardCharsets.US_ASCII));
           try {
             parser.parse(bis, handler);
-//            logger.info(part);
+            logger.debug(part);
           } catch (SAXParseException e) {
             logger.info(part);
             logger.error("parse failure: ", e);
@@ -71,31 +73,35 @@ class GCLogHandler extends DefaultHandler {
   private boolean inGcEnd = false;
   private String timestamp;
   private String intervalms;
+  private String type;
+  private String durationms;
+  private long used;
+  private long total;
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) {
-//    logger.info("start: {}", qName);
     if (qName.equals("exclusive-start")) {
       timestamp = attributes.getValue("timestamp");
       intervalms = attributes.getValue("intervalms");
-//      logger.info("timestamp: {}, intervalms: {}", timestamp, intervalms);
     }
 
     if (qName.equals("gc-end")) {
       inGcEnd = true;
+      type = attributes.getValue("type");
+      durationms = attributes.getValue("durationms");
     }
 
     if (inGcEnd && qName.equals("mem-info")) {
       long free = Long.parseLong(attributes.getValue("free"));
-      long total = Long.parseLong(attributes.getValue("total"));
-      long used = total - free;
-      logger.info("{},{}", timestamp, used);
+      total = Long.parseLong(attributes.getValue("total"));
+      used = total - free;
     }
   }
 
   @Override
   public void endElement(String uri, String localName, String qName) {
     if (qName.equals("gc-end")) {
+      logger.info("{},{},{},{},{},{}", timestamp, type, used, total, durationms, intervalms);
       inGcEnd = false;
     }
   }
